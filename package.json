@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "rm -rf dist && cd ../Phonebook && npm run build && cp -r dist ../pbackend",
+    "deploy:full": "npm run build && git add . && git commit -m build && git push",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js"
