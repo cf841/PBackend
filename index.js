@@ -1,8 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
-
+const mongoose = require('mongoose')
+const Phone = require('./models/phone')
 
 app.use(express.static('dist'))
 app.use(cors())
@@ -40,7 +42,10 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/phonebook', (request, response) => {
-  response.json(phonebook)
+  Phone.find({}).then(phonebook => {
+    response.json(phonebook)
+  })
+  
 })
 
 const genId = () => {
