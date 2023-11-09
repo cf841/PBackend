@@ -26,28 +26,29 @@ const errorHandler = (error, req, res, next) => {
 
 app.use(errorHandler)
 
+/*
 let phonebook = [
-    { 
+    {
       "id": 1,
-      "name": "Arto Hellas", 
+      "name": "Arto Hellas",
       "number": "040-123456"
     },
-    { 
+    {
       "id": 2,
-      "name": "Ada Lovelace", 
+      "name": "Ada Lovelace",
       "number": "39-44-5323523"
     },
-    { 
+    {
       "id": 3,
-      "name": "Dan Abramov", 
+      "name": "Dan Abramov",
       "number": "12-43-234345"
     },
-    { 
+    {
       "id": 4,
-      "name": "Mary Poppendieck", 
+      "name": "Mary Poppendieck",
       "number": "39-23-6423122"
     }
-]
+] */
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
@@ -57,28 +58,29 @@ app.get('/api/phonebook', (request, response) => {
   Phone.find({}).then(phonebook => {
     response.json(phonebook)
   })
-  
+
 })
 
+/*
 const genId = () => {
-  const maxId = phonebook.length > 0 
+  const maxId = phonebook.length > 0
     ? Math.max(...phonebook.map(n => n.id))
     : 0
   return maxId +1
-}
+} */
 
 app.put('/api/phonebook/:id', (req, res, next) => {
-  Phone.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true, context:'query'}).then(updatedPhone => {
+  Phone.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, context:'query' }).then(updatedPhone => {
     res.json(updatedPhone)
   }).catch(error => next(error))
 })
 
 app.post('/api/phonebook', (req, res, next) => {
   const body = req.body
-  
+
   const phone = new Phone({
     name: body.name,
-    number: body.number || ""
+    number: body.number || ''
   })
 
   phone.save().then(savedPhone => {
