@@ -14,6 +14,18 @@ morgan.token('body', req => {
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
+
+const errorHandler = (error, req, res, next) => {
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
+  }
+  next(error)
+}
+
+app.use(errorHandler)
+
 let phonebook = [
     { 
       "id": 1,
@@ -55,14 +67,14 @@ const genId = () => {
   return maxId +1
 }
 
-app.post('/api/phonebook', (req, res) => {
+app.put('/api/phonebook/:id', (req, res, next) => {
+  Phone.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true, context:'query'}).then(updatedPhone => {
+    res.json(updatedPhone)
+  }).catch(error => next(error))
+})
+
+app.post('/api/phonebook', (req, res, next) => {
   const body = req.body
-  
-  if (body.name === undefined) {
-    return res.status(400).json({ 
-      error: 'name missing' 
-    })
-  }
   
   const phone = new Phone({
     name: body.name,
@@ -71,30 +83,27 @@ app.post('/api/phonebook', (req, res) => {
 
   phone.save().then(savedPhone => {
     res.json(savedPhone)
-  })
+  }).catch(error => next(error))
 })
 
-app.get('/api/phonebook/:id', (req, res) => {
+app.get('/api/phonebook/:id', (req, res, next) => {
   Phone.findById(req.params.id).then(phone => {
     if (phone) {
       res.json(phone)
     } else {
       res.status(404).end()
     }
-  }).catch(error => {
-    console.log(error)
-    res.status(500).end()
-  })
+  }).catch(error =>  next(error) )
 })
 
-app.delete('/api/phonebook/:id', (req, res) => {
-  const id = Number(req.params.id)
-  phonebook = phonebook.filter(p => p.id !== id)
-  console.log(phonebook)
-  res.status(204).end()
+app.delete('/api/phonebook/:id', (req, res, next) => {
+  Phone.findByIdAndDelete(req.params.id).then(result => {
+    res.status(204).end()
+  }).catch(error => next(error))
 })
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
