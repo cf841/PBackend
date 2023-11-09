@@ -58,33 +58,33 @@ const genId = () => {
 app.post('/api/phonebook', (req, res) => {
   const body = req.body
   
-  if (!body.name) {
+  if (body.name === undefined) {
     return res.status(400).json({ 
       error: 'name missing' 
     })
   }
-  if (phonebook.filter(phone => phone.name === body.name).length > 0){
-    return res.status(400).json({
-      error: "name already in book"
-    })
-  }
-  const phone = {
-    id: genId(),
+  
+  const phone = new Phone({
     name: body.name,
-    number: body.number,
-  }
-  phonebook = phonebook.concat(phone)
-  res.json(phone)
+    number: body.number || ""
+  })
+
+  phone.save().then(savedPhone => {
+    res.json(savedPhone)
+  })
 })
 
 app.get('/api/phonebook/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const phone = phonebook.find(phone => phone.id === id)
-  if (phone) {
-    res.json(phone)
-  } else {
-    res.status(404).end()
-  }
+  Phone.findById(req.params.id).then(phone => {
+    if (phone) {
+      res.json(phone)
+    } else {
+      res.status(404).end()
+    }
+  }).catch(error => {
+    console.log(error)
+    res.status(500).end()
+  })
 })
 
 app.delete('/api/phonebook/:id', (req, res) => {
